@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.stats import t
+from scipy.stats import f
 
 class LinearRegression: 
     def __init__(self, X, y):
@@ -45,12 +45,16 @@ class LinearRegression:
         return np.sqrt(self.variance())
     
     def significance(self):
-        # Beräknar t-värden och p-värden för varje koefficient
-        variance_beta = np.diagonal(self.variance() * np.linalg.inv(self.X.T @ self.X))
-        std = np.sqrt(variance_beta)
-        t_values = self.beta / std
-        p_values = [2 * (1 - t.cdf(np.abs(t_val), df=self.n - self.d)) for t_val in t_values]
-        return t_values, p_values
+        
+        d = self.d - 1
+        df_res = self.n - self.d
+        SSR = self.SSR()
+        SSE = self.SSE()
+        sigma2 = SSE / df_res
+        F_stat = (SSR / d) / sigma2
+        p_value = f.sf(F_stat, d, df_res)
+        return F_stat, p_value
+
     
     def relevance(self):
         # Beräknar R^2
